@@ -11,6 +11,9 @@ import org.antlr.runtime.tree.Tree;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.*;
@@ -23,7 +26,9 @@ public class Parser {
   private TimeZone _defaultTimeZone;
   
   private static final Logger _logger = LoggerFactory.getLogger(Parser.class);
-
+ 
+  private final String matcherRegex = "(\\w+\\s\\w+)\\s(\\d+)\\s(\\d{2}:\\d{2}:\\d{2})\\s(\\d{4})";
+  
   /**
    * Tokens that should be removed from the end any list of tokens before parsing. These are
    * valid tokens, but could never add any meaningful parsing information when located at the
@@ -78,6 +83,11 @@ public class Parser {
    */
   public List<DateGroup> parse(String value, Date referenceDate) {
 
+    //Sanitize the input value before passing it through to the parser
+    if (value.matches(matcherRegex)) {
+        value = sanitizeInputValue(value);
+    }
+      
     // lex the input value to obtain our global token stream
     ANTLRInputStream input = null;
     try {
@@ -345,4 +355,26 @@ public class Parser {
       groups.add(group);
     }
   }
+  
+    /**
+     * Sanitises the input value to a format that Natty will recognise
+     *
+     * @param value
+     */
+    private String sanitizeInputValue(String value)
+    {
+        final Pattern pattern = Pattern.compile(matcherRegex);
+        final Matcher matcher = pattern.matcher(value);
+
+        while (matcher.find()) {
+            final String dayMonth = matcher.group(1);
+            final String date = matcher.group(2);
+            final String time = matcher.group(3);
+            final String year = matcher.group(4);
+
+            value = dayMonth + " " + date + " " + year + " " + time;
+        }
+        return value;
+    }
+  
 }

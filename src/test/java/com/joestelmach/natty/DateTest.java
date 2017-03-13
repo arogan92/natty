@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.text.DateFormat;
 import java.util.*;
 import java.util.Map.Entry;
+import org.junit.Ignore;
 
 /**
  * Runs the parser through the various date formats 
@@ -54,6 +55,15 @@ public class DateTest extends AbstractTest {
     validateDate("sun, nov 21 2010", 11, 21, 2010);
     validateDate("Second Monday in October 2017", 10, 9, 2017);
     validateDate("2nd thursday in sept. '02", 9, 12, 2002);
+  }
+  
+  @Test
+  public void testSanitizeDates() {
+      final Date referenceDate = new Date();
+      
+      validateDateTime(referenceDate, "Mon Feb 29 08:25:57 2016", 02, 29, 2016, 8, 25, 57);
+      validateDateTime(referenceDate, "Mon Mar 13 11:42:00 2017", 03, 13, 2017, 11, 42, 00);
+      validateDateTime(referenceDate, "Thur Jan 01 09:00:00 1970", 01, 01, 1970, 9, 00, 00);
   }
   
   @Test
